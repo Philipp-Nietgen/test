@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Happy Birthday Nadège</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Outfit:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-warm: #0f0d0b;
+    --text: #e8e2d8;
+    --text-dim: #8a8278;
+    --text-bright: #f5f0e8;
+    --accent: #c4956a;
+    --accent-warm: #d4a574;
+    --accent-rose: #b87d7d;
+    --accent-sage: #7d9b8a;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --body: 'Outfit', sans-serif;
+    --panel-count: 8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    cursor: none;
+    overflow: hidden;
+    height: 100%; height: 100dvh;
+    touch-action: none;
+    overscroll-behavior: none;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-weight: 300;
+    overflow: hidden;
+    height: 100%; height: 100dvh;
+    width: 100vw;
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    overscroll-behavior: none;
+    position: fixed;
+    inset: 0;
+  }
+
+  /* ===== CUSTOM CURSOR (hidden on touch) ===== */
+  .cursor-outer, .cursor-inner { display: none; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .cursor-outer {
+      display: block;
+      position: fixed; width: 40px; height: 40px;
+      border: 1px solid var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 10000;
+      transition: width 0.3s, height 0.3s, border-color 0.3s, opacity 0.3s;
+      transform: translate(-50%, -50%); opacity: 0.6;
+      mix-blend-mode: difference;
+    }
+    .cursor-inner {
+      display: block;
+      position: fixed; width: 6px; height: 6px;
+      background: var(--accent); border-radius: 50%;
+      pointer-events: none; z-index: 10001;
+      transform: translate(-50%, -50%);
+      transition: width 0.15s, height 0.15s;
+    }
+    .cursor-outer.hover { width: 60px; height: 60px; border-color: var(--accent-warm); opacity: 0.3; }
+    .cursor-outer.drawing { width: 20px; height: 20px; border-color: var(--accent-warm); opacity: 1; mix-blend-mode: normal; }
+  }
+
+  /* ===== GRAIN ===== */
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9998; opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat; background-size: 200px;
+  }
+
+  /* ===== SCROLL WRAPPER ===== */
+  .scroll-wrapper {
+    display: flex; height: 100%; height: 100dvh;
+    width: calc(100vw * var(--panel-count));
+    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+    touch-action: none;
+  }
+
+  /* ===== PANELS ===== */
+  .panel {
+    width: 100vw; height: 100%; height: 100dvh; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; padding: 60px 60px 90px;
+    touch-action: none;
+  }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 9999; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 6px;
+    background: linear-gradient(0deg, rgba(10,10,10,0.95) 60%, transparent);
+    padding: 0 24px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .nav-tick {
+    height: 2px; flex: 1; max-width: 64px;
+    background: rgba(138, 130, 120, 0.12);
+    border-radius: 2px; cursor: none;
+    position: relative; overflow: hidden;
+  }
+
+  .nav-tick::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--accent);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.6s ease;
+    opacity: 0;
+  }
+
+  .nav-tick.visited::after {
+    transform: scaleX(1);
+    opacity: 0.35;
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.4s ease;
+  }
+
+  .nav-tick.active::after {
+    transform: scaleX(1);
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(196, 149, 106, 0.4);
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.3s ease;
+  }
+
+  /* panel counter removed */
+
+  @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+  @keyframes fadeIn { to { opacity: 1; } }
+
+  /* ===== INTRO ===== */
+  .panel-intro { background: var(--bg); flex-direction: column; text-align: center; }
+  .panel-intro .line { overflow: hidden; }
+  .panel-intro .line-inner {
+    display: block; transform: translateY(110%);
+    animation: revealLine 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .panel-intro .line:nth-child(1) .line-inner { animation-delay: 0.2s; }
+  .panel-intro .line:nth-child(2) .line-inner { animation-delay: 0.5s; }
+  .panel-intro .line:nth-child(3) .line-inner { animation-delay: 0.8s; }
+  .panel-intro .line:nth-child(4) .line-inner { animation-delay: 1.4s; }
+  @keyframes revealLine { to { transform: translateY(0); } }
+
+  .intro-small {
+    font-family: var(--body); font-size: 0.7rem;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--text-dim); margin-bottom: 24px;
+  }
+  .intro-title {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(3rem, 9vw, 8rem); line-height: 1;
+    color: var(--text-bright); margin-bottom: 8px;
+  }
+  .intro-title em { font-style: italic; color: var(--accent); }
+  .intro-sub {
+    font-family: var(--serif); font-weight: 300; font-style: italic;
+    font-size: clamp(0.95rem, 2vw, 1.4rem); color: var(--text-dim); margin-top: 20px;
+    max-width: 500px; padding: 0 20px;
+  }
+
+  .deco-line { width: 60px; height: 1px; background: var(--accent); opacity: 0.4; margin: 24px 0; }
+
+  /* ===== SPLIT LAYOUT ===== */
+  .panel-split { display: grid; grid-template-columns: 1fr 1fr; padding: 0 0 56px 0; }
+  .panel-split .left {
+    display: flex; flex-direction: column; justify-content: center; padding: 80px;
+  }
+  .panel-split .right { position: relative; overflow: hidden; }
+  .panel-split .right::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--bg) 0%, transparent 20%);
+  }
+
+  .art-bg { position: absolute; inset: 0; opacity: 0.15; }
+  .art-bg-1 {
+    background: radial-gradient(ellipse at 30% 50%, var(--accent) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 30%, var(--accent-rose) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 80%, var(--accent-sage) 0%, transparent 45%);
+  }
+  .art-bg-2 {
+    background: radial-gradient(circle at 60% 40%, var(--accent-sage) 0%, transparent 35%),
+      radial-gradient(circle at 30% 70%, var(--accent) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, var(--accent-rose) 0%, transparent 30%);
+  }
+  .art-bg-3 {
+    background: radial-gradient(ellipse at 40% 30%, var(--accent-rose) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 60%, var(--accent) 0%, transparent 35%),
+      radial-gradient(ellipse at 20% 80%, var(--accent-sage) 0%, transparent 45%);
+  }
+  .art-bg-4 {
+    background: radial-gradient(ellipse at 50% 40%, var(--accent) 0%, transparent 45%),
+      radial-gradient(circle at 20% 70%, var(--accent-sage) 0%, transparent 35%),
+      radial-gradient(circle at 80% 20%, var(--accent-rose) 0%, transparent 40%);
+  }
+
+  .panel-label {
+    font-family: var(--body); font-size: 0.6rem;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 24px;
+  }
+  .panel-heading {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(2rem, 4.5vw, 4rem); line-height: 1.1;
+    color: var(--text-bright); margin-bottom: 32px;
+  }
+  .panel-heading em { font-style: italic; color: var(--accent); }
+  .panel-body {
+    font-family: var(--body); font-weight: 300;
+    font-size: 0.95rem; line-height: 1.9;
+    color: var(--text-dim); max-width: 440px;
+  }
+
+  .step-roman {
+    font-family: var(--serif); font-size: 6rem; font-weight: 300;
+    color: var(--accent); opacity: 0.12; position: absolute;
+    top: 80px; right: 80px; line-height: 1;
+  }
+
+  /* ===== CENTER TEXT ===== */
+  .panel-center {
+    flex-direction: column; text-align: center; background: var(--bg-warm);
+    padding-bottom: 90px;
+  }
+  .panel-center .deco-line { margin: 24px auto; }
+
+  /* ===== QUOTE ===== */
+  .panel-quote {
+    background: var(--bg); flex-direction: column; text-align: center;
+    padding-bottom: 90px;
+  }
+  .panel-quote .deco-line { margin: 24px auto; }
+  .big-quote {
+    font-family: var(--serif); font-weight: 300; font-style: italic;
+    font-size: clamp(1.5rem, 3.5vw, 3rem); line-height: 1.5;
+    color: var(--text-bright); max-width: 700px; position: relative;
+    padding: 0 20px;
+  }
+  .big-quote::before {
+    content: '\201C'; font-family: var(--serif); font-size: 8rem;
+    color: var(--accent); opacity: 0.15; position: absolute;
+    top: -60px; left: -10px; line-height: 1;
+  }
+  .quote-author {
+    font-family: var(--body); font-size: 0.7rem;
+    letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--accent); margin-top: 32px;
+  }
+
+  /* ===== CANVAS ===== */
+  .panel-canvas {
+    flex-direction: column; gap: 16px; background: var(--bg-warm);
+    padding: 30px 30px 90px;
+  }
+  .canvas-header { text-align: center; margin-bottom: 4px; }
+  .canvas-header h2 {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(1.6rem, 3vw, 2.6rem); color: var(--text-bright); margin-bottom: 6px;
+  }
+  .canvas-header p { font-family: var(--body); font-weight: 200; font-size: 0.85rem; color: var(--text-dim); }
+
+  .canvas-area {
+    position: relative; background: #faf5ee; border-radius: 4px;
+    width: min(65vh, 65vw); height: min(45vh, 45vw);
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3), inset 0 0 80px rgba(0,0,0,0.02);
+    cursor: none; touch-action: none;
+  }
+  .canvas-area canvas { width: 100%; height: 100%; border-radius: 4px; display: block; touch-action: none; }
+
+  .canvas-tools {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .color-pick {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 2px solid transparent; cursor: none; transition: all 0.2s;
+  }
+  .color-pick:hover, .color-pick.active { border-color: var(--text-bright); transform: scale(1.2); }
+  .tool-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.1); }
+  .tool-btn {
+    font-family: var(--body); font-size: 0.6rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--text-dim); background: none;
+    border: 1px solid rgba(255,255,255,0.1); padding: 7px 16px;
+    border-radius: 2px; cursor: none; transition: all 0.3s;
+  }
+  .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .size-slider {
+    -webkit-appearance: none; appearance: none; width: 70px; height: 2px;
+    background: rgba(255,255,255,0.15); outline: none; cursor: none;
+  }
+  .size-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--accent); cursor: none;
+  }
+
+  .share-section { display: flex; align-items: center; gap: 12px; margin-top: 4px; flex-wrap: wrap; justify-content: center; }
+  .share-btn {
+    font-family: var(--body); font-weight: 300; font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--bg); background: var(--accent); border: none;
+    padding: 11px 28px; border-radius: 2px; cursor: none;
+    transition: all 0.3s; display: flex; align-items: center; gap: 10px;
+  }
+  .share-btn:hover { background: var(--accent-warm); transform: translateY(-2px); }
+  .share-btn svg { width: 16px; height: 16px; fill: currentColor; }
+  .download-btn {
+    font-family: var(--body); font-weight: 300; font-size: 0.7rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text-dim); background: none; border: 1px solid rgba(255,255,255,0.15);
+    padding: 10px 24px; border-radius: 2px; cursor: none;
+    transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+  }
+  .download-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .share-status {
+    font-family: var(--body); font-size: 0.7rem; color: var(--accent-sage);
+    width: 100%; text-align: center;
+    opacity: 0; transition: opacity 0.4s; margin-top: 4px;
+  }
+  .share-status.show { opacity: 1; }
+
+  /* ===== REVEAL ===== */
+  .panel .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .panel.active .reveal { opacity: 1; transform: translateY(0); }
+  .panel .reveal-d1 { transition-delay: 0.1s; }
+  .panel .reveal-d2 { transition-delay: 0.25s; }
+  .panel .reveal-d3 { transition-delay: 0.4s; }
+  .panel .reveal-d4 { transition-delay: 0.55s; }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 800px) {
+    html, body { cursor: auto; }
+    .panel-split { grid-template-columns: 1fr; }
+    .panel-split .right { display: none; }
+    .panel-split .left { padding: 40px 28px 80px; }
+    .panel { padding: 40px 20px 80px; }
+    .panel-heading { font-size: clamp(1.8rem, 7vw, 2.8rem); margin-bottom: 20px; }
+    .panel-body { font-size: 0.9rem; line-height: 1.75; }
+    .panel-label { font-size: 0.55rem; margin-bottom: 16px; }
+    .intro-title { font-size: clamp(2.5rem, 12vw, 4.5rem); }
+    .intro-sub { font-size: clamp(0.85rem, 3.5vw, 1.1rem); }
+    .intro-small { font-size: 0.6rem; margin-bottom: 16px; }
+    .canvas-area { width: 90vw; height: 60vw; }
+    .canvas-header h2 { font-size: 1.5rem; }
+    .step-roman { top: 30px; right: 24px; font-size: 3.5rem; }
+    .nav-tick { max-width: 32px; }
+    .big-quote { font-size: clamp(1.2rem, 4.5vw, 1.8rem); padding: 0 12px; }
+    .big-quote::before { font-size: 5rem; top: -40px; left: -5px; }
+    .quote-author { font-size: 0.6rem; }
+    .deco-line { margin: 16px 0; }
+    .panel-center .deco-line, .panel-quote .deco-line { margin: 16px auto; }
+    .panel-canvas { padding: 20px 16px 80px; gap: 12px; }
+    .canvas-tools { gap: 8px; }
+    .color-pick { width: 22px; height: 22px; }
+    .tool-btn { padding: 6px 12px; font-size: 0.55rem; }
+    .share-btn { padding: 10px 20px; font-size: 0.6rem; }
+    .download-btn { padding: 9px 18px; font-size: 0.6rem; }
+    .share-section { gap: 8px; }
+    .bottom-nav { height: 48px; gap: 4px; }
+  }
+
+  @media (max-width: 400px) {
+    .panel { padding: 32px 16px 72px; }
+    .panel-split .left { padding: 32px 20px 72px; }
+    .intro-title { font-size: clamp(2.2rem, 13vw, 3.5rem); }
+    .panel-heading { font-size: clamp(1.6rem, 6.5vw, 2.2rem); }
+    .canvas-area { width: 92vw; height: 65vw; }
+    .size-slider { width: 50px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="cursor-outer" id="cursorOuter"></div>
+<div class="cursor-inner" id="cursorInner"></div>
+
+<div class="bottom-nav" id="bottomNav"></div>
+
+<div class="scroll-wrapper" id="scrollWrapper">
+
+  <!-- 1 — INTRO -->
+  <section class="panel panel-intro active" data-panel="0">
+    <div class="line"><span class="line-inner intro-small">Today is finally your day</span></div>
+    <div class="line"><span class="line-inner intro-title">Happy Birthday,</span></div>
+    <div class="line"><span class="line-inner intro-title"><em>Nadège!</em></span></div>
+    <div class="line"><span class="line-inner intro-sub">This time you have the honour to receive a gift from me.</span></div>
+  </section>
+
+  <!-- 2 — THE GIFT -->
+  <section class="panel panel-split" data-panel="1">
+    <div class="left">
+      <div class="panel-label reveal reveal-d1">Your Gift</div>
+      <h2 class="panel-heading reveal reveal-d2">One Evening with<br>Canvas, Brushes, Paints<br>& <em>me.</em></h2>
+      <div class="deco-line reveal reveal-d3"></div>
+      <p class="panel-body reveal reveal-d4">We'll spend an evening together, painting each other while complaining about our horrible painting skills (mine are actually not bad).</p>
+    </div>
+    <div class="right"><div class="art-bg art-bg-1"></div></div>
+  </section>
+
+  <!-- 3 — ACT I: Location & Drinks -->
+  <section class="panel panel-split" data-panel="2">
+    <div class="left">
+      <div class="panel-label reveal reveal-d1">Act I</div>
+      <h2 class="panel-heading reveal reveal-d2"><em>Location</em><br>& Drinks.</h2>
+      <div class="deco-line reveal reveal-d3"></div>
+      <p class="panel-body reveal reveal-d4">We'll head to Drei Weiheren or wherever you want and start off the evening with a glass of wine (wine is on me, by the way).</p>
+    </div>
+    <div class="right"><div class="art-bg art-bg-2"></div></div>
+    <div class="step-roman reveal reveal-d1">I</div>
+  </section>
+
+  <!-- 4 — ACT II: Let the games begin -->
+  <section class="panel panel-split" data-panel="3">
+    <div class="left">
+      <div class="panel-label reveal reveal-d1">Act II</div>
+      <h2 class="panel-heading reveal reveal-d2">Let the games<br><em>begin.</em></h2>
+      <div class="deco-line reveal reveal-d3"></div>
+      <p class="panel-body reveal reveal-d4">Now it's time to paint each other's faces. Spot every detail, paint each single eyelash and just enjoy looking at each other the whole evening.</p>
+    </div>
+    <div class="right"><div class="art-bg art-bg-3"></div></div>
+    <div class="step-roman reveal reveal-d1">II</div>
+  </section>
+
+  <!-- 5 — ACT III: The great reveal -->
+  <section class="panel panel-split" data-panel="4">
+    <div class="left">
+      <div class="panel-label reveal reveal-d1">Act III</div>
+      <h2 class="panel-heading reveal reveal-d2">The great<br><em>reveal.</em></h2>
+      <div class="deco-line reveal reveal-d3"></div>
+      <p class="panel-body reveal reveal-d4">Our paintings will definitely not look anything like us. But at least we will have tried. No matter how they turn out, if we painted them, they will remain a piece of art.</p>
+    </div>
+    <div class="right"><div class="art-bg art-bg-4"></div></div>
+    <div class="step-roman reveal reveal-d1">III</div>
+  </section>
+
+  <!-- 6 — PERSONAL MESSAGE -->
+  <section class="panel panel-quote" data-panel="5">
+    <div class="panel-label reveal reveal-d1">Some more words from me</div>
+    <div class="big-quote reveal reveal-d2">Nadège, I really hope that with the masterpiece we'll paint, you won't forget neither your 21st birthday, nor me. I wish you the happiest day even if I can't be at your side today.</div>
+    <div class="deco-line reveal reveal-d3"></div>
+    <div class="quote-author reveal reveal-d4">Stay tempted &hearts; Philipp</div>
+  </section>
+
+  <!-- 7 — TRANSITION -->
+  <section class="panel panel-center" data-panel="6">
+    <div class="panel-label reveal reveal-d1">Already overexcited?</div>
+    <h2 class="panel-heading reveal reveal-d2" style="max-width:700px">Paint your first artwork<br><em>right now!</em></h2>
+    <div class="deco-line reveal reveal-d3"></div>
+    <p class="panel-body reveal reveal-d4" style="text-align:center;max-width:500px;margin:0 auto">Just scroll one more time and directly share it!</p>
+  </section>
+
+  <!-- 8 — DRAW -->
+  <section class="panel panel-canvas" data-panel="7">
+    <div class="canvas-header">
+      <div class="panel-label reveal reveal-d1">Your Canvas</div>
+      <h2 class="reveal reveal-d2">LFG!!!</h2>
+      <p class="reveal reveal-d3">Draw with the brush and share your masterpiece.</p>
+    </div>
+    <div class="canvas-area reveal reveal-d2" id="canvasArea">
+      <canvas id="drawCanvas"></canvas>
+    </div>
+    <div class="canvas-tools reveal reveal-d3">
+      <div class="color-pick active" style="background:#2d2d2d" data-color="#2d2d2d"></div>
+      <div class="color-pick" style="background:#c4956a" data-color="#c4956a"></div>
+      <div class="color-pick" style="background:#b87d7d" data-color="#b87d7d"></div>
+      <div class="color-pick" style="background:#7d9b8a" data-color="#7d9b8a"></div>
+      <div class="color-pick" style="background:#4a6fa5" data-color="#4a6fa5"></div>
+      <div class="color-pick" style="background:#d4a574" data-color="#d4a574"></div>
+      <div class="color-pick" style="background:#e8dcc8" data-color="#e8dcc8"></div>
+      <div class="tool-divider"></div>
+      <input type="range" class="size-slider" id="brushSize" min="2" max="30" value="8">
+      <div class="tool-divider"></div>
+      <button class="tool-btn" id="eraserBtn">Eraser</button>
+      <button class="tool-btn" id="clearBtn">Clear</button>
+    </div>
+    <div class="share-section reveal reveal-d4">
+      <button class="share-btn" id="shareBtn">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Share on WhatsApp
+      </button>
+      <button class="download-btn" id="downloadBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Save Image
+      </button>
+      <span class="share-status" id="shareStatus"></span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ===== CURSOR (only on non-touch devices) =====
+const cursorOuter = document.getElementById('cursorOuter');
+const cursorInner = document.getElementById('cursorInner');
+let mouseX = -100, mouseY = -100;
+let outerX = -100, outerY = -100;
+let innerX = -100, innerY = -100;
+const hasPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+if (hasPointer) {
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  (function animateCursor() {
+    innerX += (mouseX - innerX) * 0.35;
+    innerY += (mouseY - innerY) * 0.35;
+    cursorInner.style.left = innerX + 'px';
+    cursorInner.style.top = innerY + 'px';
+
+    outerX += (mouseX - outerX) * 0.18;
+    outerY += (mouseY - outerY) * 0.18;
+    cursorOuter.style.left = outerX + 'px';
+    cursorOuter.style.top = outerY + 'px';
+
+    requestAnimationFrame(animateCursor);
+  })();
+
+  document.querySelectorAll('.nav-tick, .tool-btn, .share-btn, .download-btn, .color-pick, button, a').forEach(el => {
+    el.addEventListener('mouseenter', () => cursorOuter.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursorOuter.classList.remove('hover'));
+  });
+}
+
+// ===== HORIZONTAL SCROLL =====
+const wrapper = document.getElementById('scrollWrapper');
+const panels = document.querySelectorAll('.panel');
+const bottomNav = document.getElementById('bottomNav');
+let currentPanel = 0, isScrolling = false;
+const totalPanels = panels.length;
+
+panels.forEach((_, i) => {
+  const tick = document.createElement('div');
+  tick.className = 'nav-tick' + (i === 0 ? ' active' : '');
+  tick.addEventListener('click', () => goToPanel(i));
+  bottomNav.appendChild(tick);
+});
+
+function goToPanel(index) {
+  if (index < 0 || index >= totalPanels || isScrolling) return;
+  isScrolling = true;
+  currentPanel = index;
+  wrapper.style.transform = `translateX(-${currentPanel * 100}vw)`;
+
+  document.querySelectorAll('.nav-tick').forEach((t, i) => {
+    t.classList.remove('active');
+    t.classList.toggle('visited', i < currentPanel);
+    if (i === currentPanel) t.classList.add('active');
+  });
+
+  panels.forEach((p, i) => p.classList.toggle('active', i === currentPanel));
+  if (hasPointer) cursorOuter.classList.toggle('drawing', currentPanel === totalPanels - 1);
+  setTimeout(() => { isScrolling = false; }, 1000);
+}
+
+let scrollAccum = 0;
+document.addEventListener('wheel', e => {
+  e.preventDefault();
+  if (isScrolling) return;
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  scrollAccum += delta;
+  if (Math.abs(scrollAccum) > 50) {
+    goToPanel(currentPanel + (scrollAccum > 0 ? 1 : -1));
+    scrollAccum = 0;
+  }
+}, { passive: false });
+
+let touchStartX = 0, touchStartY = 0, touchOnCanvas = false, isSwiping = false;
+
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchOnCanvas = e.target.closest('.canvas-area') !== null;
+  isSwiping = false;
+}, { passive: false });
+
+document.addEventListener('touchmove', e => {
+  if (touchOnCanvas) return; // Allow drawing on canvas
+  const dx = touchStartX - e.touches[0].clientX;
+  const dy = touchStartY - e.touches[0].clientY;
+  // Once we detect any movement, prevent default to stop browser scroll/zoom
+  e.preventDefault();
+  if (Math.abs(dx) > 30 && Math.abs(dx) > Math.abs(dy)) {
+    isSwiping = true;
+  }
+}, { passive: false });
+
+document.addEventListener('touchend', e => {
+  if (touchOnCanvas || !isSwiping) return;
+  const dx = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(dx) > 40) {
+    goToPanel(currentPanel + (dx > 0 ? 1 : -1));
+  }
+  isSwiping = false;
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPanel(currentPanel + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goToPanel(currentPanel - 1);
+});
+
+// ===== BRUSH DRAWING ENGINE =====
+const drawCanvas = document.getElementById('drawCanvas');
+const drawCtx = drawCanvas.getContext('2d');
+const canvasArea = document.getElementById('canvasArea');
+let drawing = false, drawColor = '#2d2d2d', brushSizeVal = 8, isEraser = false;
+let lastPoint = null;
+
+function resizeDrawCanvas() {
+  const rect = canvasArea.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  let imgData = null;
+  try { imgData = drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height); } catch(e) {}
+  drawCanvas.width = rect.width * dpr;
+  drawCanvas.height = rect.height * dpr;
+  drawCtx.scale(dpr, dpr);
+  drawCanvas.style.width = rect.width + 'px';
+  drawCanvas.style.height = rect.height + 'px';
+  if (imgData) try { drawCtx.putImageData(imgData, 0, 0); } catch(e) {}
+}
+
+new ResizeObserver(() => resizeDrawCanvas()).observe(canvasArea);
+
+function getCanvasPos(e) {
+  const rect = drawCanvas.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: cx - rect.left, y: cy - rect.top };
+}
+
+function drawBrushStroke(from, to) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const steps = Math.max(1, Math.floor(dist / 2));
+
+  drawCtx.save();
+  drawCtx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
+
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = from.x + dx * t;
+    const y = from.y + dy * t;
+    const sizeJitter = brushSizeVal * (0.85 + Math.random() * 0.3);
+    const halfSize = sizeJitter / 2;
+    const jitterX = (Math.random() - 0.5) * brushSizeVal * 0.15;
+    const jitterY = (Math.random() - 0.5) * brushSizeVal * 0.15;
+
+    if (isEraser) {
+      drawCtx.beginPath();
+      drawCtx.arc(x + jitterX, y + jitterY, halfSize, 0, Math.PI * 2);
+      drawCtx.fill();
+    } else {
+      drawCtx.fillStyle = drawColor;
+      drawCtx.globalAlpha = 0.3 + Math.random() * 0.15;
+      drawCtx.beginPath();
+      drawCtx.arc(x + jitterX, y + jitterY, halfSize, 0, Math.PI * 2);
+      drawCtx.fill();
+    }
+  }
+  drawCtx.restore();
+  drawCtx.globalAlpha = 1;
+}
+
+function startDraw(e) {
+  if (currentPanel !== totalPanels - 1) return;
+  drawing = true;
+  lastPoint = getCanvasPos(e);
+  drawBrushStroke(lastPoint, lastPoint);
+}
+function moveDraw(e) {
+  if (!drawing || !lastPoint) return;
+  const pos = getCanvasPos(e);
+  drawBrushStroke(lastPoint, pos);
+  lastPoint = pos;
+}
+function stopDraw() { drawing = false; lastPoint = null; }
+
+drawCanvas.addEventListener('mousedown', startDraw);
+drawCanvas.addEventListener('mousemove', moveDraw);
+drawCanvas.addEventListener('mouseup', stopDraw);
+drawCanvas.addEventListener('mouseleave', stopDraw);
+drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, { passive: false });
+drawCanvas.addEventListener('touchmove', e => { e.preventDefault(); moveDraw(e); }, { passive: false });
+drawCanvas.addEventListener('touchend', stopDraw);
+
+document.querySelectorAll('.color-pick').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.color-pick').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    drawColor = el.dataset.color;
+    isEraser = false;
+    document.getElementById('eraserBtn').style.borderColor = '';
+    document.getElementById('eraserBtn').style.color = '';
+  });
+});
+
+document.getElementById('brushSize').addEventListener('input', e => { brushSizeVal = parseInt(e.target.value); });
+
+document.getElementById('eraserBtn').addEventListener('click', function() {
+  isEraser = !isEraser;
+  this.style.borderColor = isEraser ? 'var(--accent)' : '';
+  this.style.color = isEraser ? 'var(--accent)' : '';
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+});
+
+// ===== GENERATE FINAL IMAGE =====
+function generateImage() {
+  const tempCanvas = document.createElement('canvas');
+  const tempCtx = tempCanvas.getContext('2d');
+  tempCanvas.width = drawCanvas.width;
+  tempCanvas.height = drawCanvas.height;
+  tempCtx.fillStyle = '#faf5ee';
+  tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+  tempCtx.drawImage(drawCanvas, 0, 0);
+  return tempCanvas;
+}
+
+// ===== DOWNLOAD BUTTON =====
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const tempCanvas = generateImage();
+  const dataUrl = tempCanvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = 'masterpiece.png';
+  a.click();
+  showStatus('Image saved!');
+});
+
+// ===== WHATSAPP SHARE =====
+const shareStatus = document.getElementById('shareStatus');
+
+function showStatus(msg) {
+  shareStatus.textContent = msg;
+  shareStatus.classList.add('show');
+  setTimeout(() => shareStatus.classList.remove('show'), 5000);
+}
+
+document.getElementById('shareBtn').addEventListener('click', async () => {
+  const tempCanvas = generateImage();
+
+  // Strategy 1: Web Share API with file (works on mobile Safari/Chrome)
+  try {
+    const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
+    if (blob && navigator.share) {
+      const file = new File([blob], 'masterpiece.png', { type: 'image/png' });
+      const shareData = { files: [file] };
+
+      if (navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share({
+          files: [file],
+          title: 'My first masterpiece',
+          text: 'Look what I painted! 🎨'
+        });
+        showStatus('Shared!');
+        return;
+      }
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+  }
+
+  // Strategy 2: Open image in new tab so user can save/share it
+  try {
+    const blob = await new Promise(resolve => tempCanvas.toBlob(resolve, 'image/png'));
+    if (blob) {
+      const blobUrl = URL.createObjectURL(blob);
+      const imgWindow = window.open('', '_blank');
+      if (imgWindow) {
+        imgWindow.document.write(`
+          <!DOCTYPE html>
+          <html><head><title>Your Masterpiece</title>
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <style>
+            body { margin:0; background:#111; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; font-family:sans-serif; color:#e8e2d8; gap:20px; padding:20px; }
+            img { max-width:90vw; max-height:60vh; border-radius:8px; box-shadow:0 4px 30px rgba(0,0,0,0.5); }
+            p { font-size:14px; opacity:0.7; text-align:center; max-width:400px; line-height:1.6; }
+            a { display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#fff; padding:12px 28px; border-radius:8px; text-decoration:none; font-weight:500; font-size:15px; margin-top:8px; }
+            a:hover { background:#1da851; }
+            .hint { font-size:12px; opacity:0.5; }
+          </style></head><body>
+          <img src="${blobUrl}" alt="Masterpiece">
+          <p>Long press the image (mobile) or right click and save (desktop), then share via WhatsApp:</p>
+          <a href="https://wa.me/?text=${encodeURIComponent('Look at my first masterpiece! 🎨🖌️')}" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Open WhatsApp
+          </a>
+          <p class="hint">Tip: Save the image first, then attach it as a photo in WhatsApp.</p>
+          </body></html>
+        `);
+        imgWindow.document.close();
+        showStatus('Image opened. Save it and share via WhatsApp!');
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // Strategy 3: Pure data URL fallback
+  const dataUrl = tempCanvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = 'masterpiece.png';
+  a.click();
+  showStatus('Image downloaded!');
+  setTimeout(() => {
+    window.open('https://wa.me/?text=' + encodeURIComponent('Look at my first masterpiece! 🎨🖌️'), '_blank');
+  }, 600);
+});
+</script>
+</body>
+</html>
